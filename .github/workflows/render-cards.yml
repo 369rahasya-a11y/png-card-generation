@@ -1,0 +1,86 @@
+name: Rahasya — Generate & Upload Social Cards
+
+on:
+  # Trigger manually from the Actions tab (useful for testing / backfills)
+  workflow_dispatch:
+    inputs:
+      date_override:
+        description: "Date to render cards for (YYYY-MM-DD). Leave blank to use latest batch."
+        required: false
+        default: ""
+
+  # Daily schedule: 07:30 IST = 02:00 UTC
+  schedule:
+    - cron: "0 2 * * *"
+
+  # Also trigger automatically after the upstream extraction pipeline succeeds
+  # Replace 'extraction.yml' with the actual filename of your upstream workflow.
+  workflow_run:
+    workflows: ["Rahasya — Extract Marketing Content"]
+    types: [completed]
+
+jobs:
+  render-cards:
+    name: Render & Upload PNG Cards
+    runs-on: ubuntu-latest
+
+    # Only run on success when triggered by another workflow.
+    # workflow_dispatch and schedule always run.
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      # ── Checkout ─────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Python ───────────────────────────────────────────────────────────
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # ── Dependencies ─────────────────────────────────────────────────────
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # ── Font cache (speeds up repeat runs) ───────────────────────────────
+      - name: Cache fonts
+        uses: actions/cache@v4
+        with:
+          path: fonts/
+          key: rahasya-fonts-v2
+
+      # ── Download fonts (if not cached) ───────────────────────────────────
+      - name: Bootstrap fonts
+        run: python scripts/fetch_fonts.py
+
+      # ── Render ───────────────────────────────────────────────────────────
+      - name: Render and upload cards
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RAHASYA_DATE: ${{ github.event.inputs.date_override }}
+        run: python scripts/main.py
+
+      # ── Artifacts (keep cards for inspection in the Actions UI) ──────────
+      - name: Upload card artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rahasya-cards-${{ github.run_id }}
+          path: |
+            output/cards/
+            output/reports/
+          retention-days: 7
+
+      # ── Summary ──────────────────────────────────────────────────────────
+      - name: Write job summary
+        if: always()
+        run: |
+          echo "## Rahasya Card Render Report" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          cat output/reports/report.json >> $GITHUB_STEP_SUMMARY || echo "{}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
