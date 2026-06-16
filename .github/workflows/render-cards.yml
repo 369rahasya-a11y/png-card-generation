@@ -1,7 +1,7 @@
 name: Rahasya — Generate & Upload Social Cards
 
 on:
-  # Trigger manually from the Actions tab (useful for testing / backfills)
+  # Manual trigger from Actions tab
   workflow_dispatch:
     inputs:
       date_override:
@@ -9,23 +9,19 @@ on:
         required: false
         default: ""
 
-  # Daily schedule: 07:30 IST = 02:00 UTC
-  schedule:
-    - cron: "0 2 * * *"
-
-  # Also trigger automatically after the upstream extraction pipeline succeeds
-  # Replace 'extraction.yml' with the actual filename of your upstream workflow.
+  # Run automatically after Marketing Horoscope Selector completes
   workflow_run:
-    workflows: ["Rahasya — Extract Marketing Content"]
-    types: [completed]
+    workflows:
+      - "Marketing Horoscope Selector"
+    types:
+      - completed
 
 jobs:
   render-cards:
     name: Render & Upload PNG Cards
     runs-on: ubuntu-latest
 
-    # Only run on success when triggered by another workflow.
-    # workflow_dispatch and schedule always run.
+    # Only run if upstream workflow succeeded
     if: >
       github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'success'
@@ -46,26 +42,27 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # ── Font cache (speeds up repeat runs) ───────────────────────────────
+      # ── Font cache ───────────────────────────────────────────────────────
       - name: Cache fonts
         uses: actions/cache@v4
         with:
           path: fonts/
           key: rahasya-fonts-v2
 
-      # ── Download fonts (if not cached) ───────────────────────────────────
+      # ── Bootstrap fonts ──────────────────────────────────────────────────
       - name: Bootstrap fonts
         run: python scripts/fetch_fonts.py
 
-      # ── Render ───────────────────────────────────────────────────────────
+      # ── Render & Upload ──────────────────────────────────────────────────
       - name: Render and upload cards
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_STORAGE_BUCKET: social-cards
           RAHASYA_DATE: ${{ github.event.inputs.date_override }}
         run: python scripts/main.py
 
-      # ── Artifacts (keep cards for inspection in the Actions UI) ──────────
+      # ── Upload artifacts ────────────────────────────────────────────────
       - name: Upload card artifacts
         if: always()
         uses: actions/upload-artifact@v4
