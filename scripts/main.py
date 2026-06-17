@@ -176,7 +176,7 @@ def fetch_rows(horoscope_date: str) -> list:
     rows = _sb_get(
         C.MARKETING_CONTENT_TABLE,
         params={
-            "select": "marketing_horoscope_id,sign,mood,card_text,hook,reel_hook,reel_script,caption,horoscope_date",
+            "select": "marketing_horoscope_id,sign,mood,card_hook,card_text,reel_hook,reel_script,caption,horoscope_date",
             "horoscope_date": f"eq.{horoscope_date}",
             "card_text": "not.is.null",
             "order": "sign.asc,mood.asc",
