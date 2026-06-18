@@ -1,7 +1,6 @@
 name: Rahasya — Generate & Upload Social Cards
 
 on:
-  # Manual trigger from Actions tab
   workflow_dispatch:
     inputs:
       date_override:
@@ -9,51 +8,33 @@ on:
         required: false
         default: ""
 
-  # Run automatically after Marketing Horoscope Selector completes
-  workflow_run:
-    workflows:
-      - "Marketing Horoscope Selector"
-    types:
-      - completed
-
 jobs:
   render-cards:
     name: Render & Upload PNG Cards
     runs-on: ubuntu-latest
 
-    # Only run if upstream workflow succeeded
-    if: >
-      github.event_name != 'workflow_run' ||
-      github.event.workflow_run.conclusion == 'success'
-
     steps:
-      # ── Checkout ─────────────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── Python ───────────────────────────────────────────────────────────
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
 
-      # ── Dependencies ─────────────────────────────────────────────────────
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # ── Font cache ───────────────────────────────────────────────────────
       - name: Cache fonts
         uses: actions/cache@v4
         with:
           path: fonts/
           key: rahasya-fonts-v2
 
-      # ── Bootstrap fonts ──────────────────────────────────────────────────
       - name: Bootstrap fonts
         run: python scripts/fetch_fonts.py
 
-      # ── Render & Upload ──────────────────────────────────────────────────
       - name: Render and upload cards
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -62,7 +43,6 @@ jobs:
           RAHASYA_DATE: ${{ github.event.inputs.date_override }}
         run: python scripts/main.py
 
-      # ── Upload artifacts ────────────────────────────────────────────────
       - name: Upload card artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -73,7 +53,6 @@ jobs:
             output/reports/
           retention-days: 7
 
-      # ── Summary ──────────────────────────────────────────────────────────
       - name: Write job summary
         if: always()
         run: |
