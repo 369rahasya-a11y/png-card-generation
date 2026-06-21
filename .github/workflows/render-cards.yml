@@ -8,6 +8,12 @@ on:
         required: false
         default: ""
 
+  # 3:00 AM IST daily
+  # GitHub cron uses UTC
+  # 21:30 UTC = 03:00 AM IST
+  schedule:
+    - cron: '30 21 * * *'
+
 jobs:
   render-cards:
     name: Render & Upload PNG Cards
