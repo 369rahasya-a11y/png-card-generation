@@ -12,7 +12,7 @@ on:
   # GitHub cron uses UTC
   # 21:30 UTC = 03:00 AM IST
   schedule:
-    - cron: '30 21 * * *'
+    - cron: '30 0 * * *'
 
 jobs:
   render-cards:
