@@ -7,12 +7,13 @@ on:
         description: "Date to render cards for (YYYY-MM-DD). Leave blank to use latest batch."
         required: false
         default: ""
+        
+# 6:00 AM IST daily
+# GitHub cron uses UTC
+# 00:30 UTC = 06:00 AM IST
 
-  # 3:00 AM IST daily
-  # GitHub cron uses UTC
-  # 21:30 UTC = 03:00 AM IST
-  schedule:
-    - cron: '30 0 * * *'
+ schedule:
+  - cron: '30 0 * * *'
 
 jobs:
   render-cards:
