@@ -8,11 +8,8 @@ on:
         required: false
         default: ""
 
-  # 6:00 AM IST daily
-  # GitHub cron uses UTC
-  # 00:30 UTC = 06:00 AM IST
   schedule:
-    - cron: '30 0 * * *'
+    - cron: "30 0 * * *"
 
 jobs:
   render-cards:
@@ -27,7 +24,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
+          cache: "pip"
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
