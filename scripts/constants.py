@@ -152,8 +152,8 @@ TEXT_SECONDARY = "#CFCFCF"   # supporting text
 GLOW_POSITIONS = ["top-left", "top-right", "center", "lower-center", "diagonal"]
 
 # Opacity range for the radial glow overlay (8-15%)
-GLOW_OPACITY_MIN = 0.08
-GLOW_OPACITY_MAX = 0.15
+GLOW_OPACITY_MIN = 0.10
+GLOW_OPACITY_MAX = 0.18
 
 # Glow radius as a fraction of the canvas width
 GLOW_RADIUS_FRACTION = 0.62
@@ -222,7 +222,7 @@ def get_quote_bucket(card_text: str) -> dict:
 # HEADER TYPOGRAPHY
 # ---------------------------------------------------------------------------
 
-HEADER_ICON_SIZE = 110          # bounding box (px) for the zodiac glyph
+HEADER_ICON_SIZE = 100          # bounding box (px) for the zodiac glyph
 HEADER_ICON_STROKE = 4          # stroke width for vector glyphs
 HEADER_SIGN_FONT_SIZE = 52
 HEADER_MOOD_FONT_SIZE = 30
@@ -235,7 +235,7 @@ HEADER_SIGN_TO_MOOD_GAP = 18
 # DIVIDER
 # ---------------------------------------------------------------------------
 
-DIVIDER_CHAR_WIDTH = 420   # px width of the divider line
+DIVIDER_CHAR_WIDTH = 520   # px width of the divider line
 DIVIDER_THICKNESS = 2
 DIVIDER_OPACITY = 0.35     # relative to TEXT_SECONDARY
 
@@ -244,13 +244,13 @@ DIVIDER_OPACITY = 0.35     # relative to TEXT_SECONDARY
 # ---------------------------------------------------------------------------
 
 FOOTER_WEBSITE_TEXT = "discover-rahasya.vercel.app"
-FOOTER_SUPPORT_TEXT = "Explore today's 15 moods"
+FOOTER_SUPPORT_TEXT = "Discover your complete reading"
 
-FOOTER_WEBSITE_FONT_SIZE = 34
-FOOTER_SUPPORT_FONT_SIZE = 24
+FOOTER_WEBSITE_FONT_SIZE = 28
+FOOTER_SUPPORT_FONT_SIZE = 26
 
-FOOTER_PILL_PADDING_X = 48
-FOOTER_PILL_PADDING_Y = 22
+FOOTER_PILL_PADDING_X = 56
+FOOTER_PILL_PADDING_Y = 18
 FOOTER_PILL_RADIUS = 40
 FOOTER_PILL_TO_SUPPORT_GAP = 32
 
